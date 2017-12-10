@@ -1,6 +1,6 @@
 package org.w3.banana.jena
 
-import com.hp.hpl.jena.query.Dataset
+import org.apache.jena.query.Dataset
 import org.w3.banana._
 import org.w3.banana.jena.io._
 import org.w3.banana.io._
@@ -17,6 +17,7 @@ with SparqlHttpModule
 with RDFXMLReaderModule
 with TurtleReaderModule
 with NTriplesReaderModule
+with JsonLDReaderModule
 with NTriplesWriterModule
 with RDFXMLWriterModule
 with TurtleWriterModule
@@ -38,7 +39,11 @@ with XmlQueryResultsReaderModule {
   implicit val sparqlGraph: SparqlEngine[Jena, Try, Jena#Graph] = JenaGraphSparqlEngine(ops)
 
   import java.net.URL
-  implicit val sparqlHttp: SparqlEngine[Jena, Try, URL] = new JenaSparqlHttpEngine
+  /**
+    * @deprecated see issue [[https://github.com/banana-rdf/banana-rdf/issues/332]]
+    */
+  @deprecated("see issue https://github.com/banana-rdf/banana-rdf/issues/332", "0.8.x")
+  implicit val sparqlHttp: SparqlEngine[Jena, Try, URL] with SparqlUpdate[Jena, Try, URL] = new JenaSparqlHttpEngine
 
   implicit val rdfStore: RDFStore[Jena, Try, Dataset] with SparqlUpdate[Jena, Try, Dataset] = new JenaDatasetStore(true)
 
@@ -57,6 +62,8 @@ with XmlQueryResultsReaderModule {
   implicit val n3Writer: RDFWriter[Jena, Try, N3] = JenaRDFWriter.n3Writer
 
   implicit val ntriplesWriter: RDFWriter[Jena, Try, NTriples] = new NTriplesWriter[Jena]
+
+  implicit val jsonldReader: RDFReader[Rdf, Try, JsonLd] = JenaRDFReader.jsonLdReader
 
   implicit val jsonSolutionsWriter: SparqlSolutionsWriter[Jena, SparqlAnswerJson] =
     JenaSolutionsWriter.solutionsWriterJson
