@@ -13,8 +13,10 @@ import scala.util.Try
 
 object PlantainTurtleWriter extends RDFWriter[Plantain, Try, Turtle] {
 
+  val valueFactory = SimpleValueFactory.getInstance()
+
   /** accepts relative URIs */
-  class MyUri(uri: String) extends sesame.URI {
+  class MyUri(uri: String) extends sesame.IRI {
     def getLocalName(): String = ???
     def getNamespace(): String = ???
     def stringValue(): String = uri
@@ -34,21 +36,21 @@ object PlantainTurtleWriter extends RDFWriter[Plantain, Try, Turtle] {
     def statement(s: Plantain#Node, p: Plantain#URI, o: Plantain#Node): sesame.Statement = {
       val subject: sesame.Resource = s match {
         case Uri(uri)           => new MyUri(uri.toString)
-        case model.BNode(label) => new BNodeImpl(label)
+        case model.BNode(label) => valueFactory.createBNode(label)
         case literal            => throw new IllegalArgumentException(s"$literal was in subject position")
       }
-      val predicate: sesame.URI = p match {
+      val predicate: sesame.IRI = p match {
         case uri: Plantain#URI => new MyUri(uri.toString())
       }
       val objectt: sesame.Value = o match {
         case uri: Plantain#URI   => new MyUri(uri.toString)
-        case model.BNode(label)  => new BNodeImpl(label)
+        case model.BNode(label)  => valueFactory.createBNode(label)
         case literal             => PlantainOps.fromLiteral(literal) match {
-          case (lexicalForm, uri, None)     => new LiteralImpl(lexicalForm, new URIImpl(uri.toString))
-          case (lexicalForm, _, Some(lang)) => new LiteralImpl(lexicalForm, lang)
+          case (lexicalForm, uri, None)     => valueFactory.createLiteral(lexicalForm, valueFactory.createIRI(uri.toString))
+          case (lexicalForm, _, Some(lang)) => valueFactory.createLiteral(lexicalForm, lang)
         }
       }
-      new StatementImpl(subject, predicate, objectt)
+      valueFactory.createStatement(subject, predicate, objectt)
     }
 
     def write(): Try[Unit] = Try {

@@ -68,7 +68,7 @@ lazy val publicationSettings = pomSettings ++ {
 
 lazy val commonSettings = publicationSettings ++ defaultScalariformSettings ++ Seq(
   organization := "org.w3",
-  scalaVersion := "2.12.1",
+  scalaVersion := "2.12.4",
   crossScalaVersions := Seq("2.11.8", "2.12.1"),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
   resolvers += "apache-repo-releases" at "http://repository.apache.org/content/repositories/releases/",
@@ -131,7 +131,7 @@ lazy val plantain = crossProject
   .in(file("plantain"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Seq(akkaHttpCore, sesameRioTurtle, jsonldJava)
+    libraryDependencies ++= Seq(akkaHttpCore, sesameRioTurtle)//jsonldJava)
   )
   .settings(name := "banana-plantain")
   .dependsOn(rdf, ntriples, rdfTestSuite % "test->compile")
@@ -154,11 +154,11 @@ lazy val sesame = Project("sesame", file("sesame"), settings = commonSettings)
       sesameQueryResult,
       sesameRioTurtle,
       sesameRioRdfxml,
+      sesameRioJsonld,
       sesameSailMemory,
       sesameSailNativeRdf,
       sesameRepositorySail,
-      commonsLogging,
-      jsonldJava
+      commonsLogging
     )
   ).dependsOn(rdfJVM, ntriplesJVM, rdfTestSuiteJVM % "test->compile")
 

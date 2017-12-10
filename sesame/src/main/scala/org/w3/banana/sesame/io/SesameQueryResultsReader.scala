@@ -2,9 +2,10 @@ package org.w3.banana.sesame.io
 
 import java.io._
 
+import org.openrdf.model.impl.SimpleValueFactory
 import org.openrdf.query.resultio._
 import org.w3.banana.io.SparqlQueryResultsReader
-import org.w3.banana.sesame.{ BindingsAccumulator, Sesame }
+import org.w3.banana.sesame.{BindingsAccumulator, Sesame}
 import org.w3.banana.io._
 
 import scala.util._
@@ -25,16 +26,16 @@ private abstract class SesameQueryResultsReader[S] extends SparqlQueryResultsRea
     */
   def parse(bytes: Array[Byte]): Try[Either[Sesame#Solutions, Boolean]] = Try {
     try {
-      val parsed = QueryResultIO.parse(new ByteArrayInputStream(bytes), booleanFormat)
+      val parsed = QueryResultIO.parseBoolean(new ByteArrayInputStream(bytes), booleanFormat)
       Right(parsed)
     } catch {
       case e: QueryResultParseException =>
         val enumerator = new BindingsAccumulator()
-        QueryResultIO.parse(
+        QueryResultIO.parseTuple(
           new ByteArrayInputStream(bytes),
           tupleFormat,
           enumerator,
-          org.openrdf.model.impl.ValueFactoryImpl.getInstance())
+          SimpleValueFactory.getInstance())
         Left(enumerator.bindings())
     }
   }
@@ -51,13 +52,13 @@ object SesameQueryResultsReader {
   val queryResultsReaderJson: SparqlQueryResultsReader[Sesame, SparqlAnswerJson] =
     new SesameQueryResultsReader[SparqlAnswerJson] {
       val tupleFormat = TupleQueryResultFormat.JSON
-      val booleanFormat = BooleanQueryResultFormat.forMIMEType("application/sparql-results+json")
+      val booleanFormat = BooleanQueryResultFormat.JSON
     }
 
   implicit val queryResultsReaderXml: SparqlQueryResultsReader[Sesame, SparqlAnswerXml] =
     new SesameQueryResultsReader[SparqlAnswerXml] {
       val tupleFormat = TupleQueryResultFormat.SPARQL
-      val booleanFormat = BooleanQueryResultFormat.forMIMEType("application/sparql-results+xml")
+      val booleanFormat = BooleanQueryResultFormat.SPARQL
     }
 
 }

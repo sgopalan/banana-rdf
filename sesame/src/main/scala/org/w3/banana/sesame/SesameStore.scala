@@ -13,6 +13,8 @@ class SesameStore
     extends RDFStore[Sesame, Try, RepositoryConnection]
     with SparqlUpdate[Sesame, Try, RepositoryConnection] {
 
+  val valueFactory = SimpleValueFactory.getInstance()
+
   /* Transactor */
 
   def r[T](conn: RepositoryConnection, body: => T): Try[T] = ???
@@ -71,7 +73,7 @@ class SesameStore
   def removeTriples(conn: RepositoryConnection, uri: Sesame#URI, tripleMatches: Iterable[TripleMatch[Sesame]]): Try[Unit] = Try {
     val ts = tripleMatches.map {
       case (s, p, o) =>
-        new StatementImpl(s.asInstanceOf[Resource], p.asInstanceOf[URI], o)
+        valueFactory.createStatement(s.asInstanceOf[Resource], p.asInstanceOf[IRI], o)
     }
     conn.remove(ts.asJava, uri)
   }

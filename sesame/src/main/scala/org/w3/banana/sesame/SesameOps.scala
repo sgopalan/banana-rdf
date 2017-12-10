@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
 
 class SesameOps extends RDFOps[Sesame] with SesameMGraphOps with DefaultURIOps[Sesame] {
 
-  val valueFactory: ValueFactory = ValueFactoryImpl.getInstance()
+  val valueFactory: ValueFactory = SimpleValueFactory.getInstance()
 
   // graph
 
@@ -29,7 +29,7 @@ class SesameOps extends RDFOps[Sesame] with SesameMGraphOps with DefaultURIOps[S
 
   def makeTriple(s: Sesame#Node, p: Sesame#URI, o: Sesame#Node): Sesame#Triple =
     s match {
-      case res:Resource=>  new StatementImpl(res, p, o)
+      case res:Resource=>  valueFactory.createStatement(res, p, o)
       case _=> throw new RuntimeException("makeTriple: in Sesame subject " + p.toString + " must be a either URI or BlankNode")
     }
 
@@ -51,16 +51,16 @@ class SesameOps extends RDFOps[Sesame] with SesameMGraphOps with DefaultURIOps[S
    */
   def makeUri(iriStr: String): Sesame#URI = {
     try {
-      new URIImpl(iriStr)
+      valueFactory.createIRI(iriStr)
     } catch {
       case iae: IllegalArgumentException =>
-        new URI {
-          override def equals(o: Any): Boolean = o.isInstanceOf[URI] && o.asInstanceOf[URI].toString == iriStr
-          def getLocalName: String = iriStr
-          def getNamespace: String = ""
+        new SimpleIRI {
+          override def equals(o: Any): Boolean = o.isInstanceOf[IRI] && o.asInstanceOf[IRI].toString == iriStr
+          override def getLocalName: String = iriStr
+          override def getNamespace: String = ""
           override def hashCode: Int = iriStr.hashCode
           override def toString: String = iriStr
-          def stringValue: String = iriStr
+          override def stringValue: String = iriStr
         }
     }
 
@@ -72,7 +72,7 @@ class SesameOps extends RDFOps[Sesame] with SesameMGraphOps with DefaultURIOps[S
 
   def makeBNode() = valueFactory.createBNode()
 
-  def makeBNodeLabel(label: String): Sesame#BNode = new BNodeImpl(label)
+  def makeBNodeLabel(label: String): Sesame#BNode = valueFactory.createBNode(label)
 
   def fromBNode(bn: Sesame#BNode): String = bn.getID
 
@@ -81,18 +81,18 @@ class SesameOps extends RDFOps[Sesame] with SesameMGraphOps with DefaultURIOps[S
   val __xsdString = makeUri("http://www.w3.org/2001/XMLSchema#string")
   val __rdfLangString = makeUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#langString")
 
-  class LangLiteral(label: String, language: String) extends LiteralImpl(label, language) {
+  class LangLiteral(label: String, language: String) extends SimpleLiteral(label, language) {
     this.setDatatype(__rdfLangString)
   }
 
   def makeLiteral(lexicalForm: String, datatype: Sesame#URI): Sesame#Literal =
-    new LiteralImpl(lexicalForm, datatype)
+    valueFactory.createLiteral(lexicalForm, datatype)
 
   def makeLangTaggedLiteral(lexicalForm: String, lang: Sesame#Lang): Sesame#Literal =
     new LangLiteral(lexicalForm, lang)
 
   def fromLiteral(literal: Sesame#Literal): (String, Sesame#URI, Option[Sesame#Lang]) =
-    (literal.getLabel, literal.getDatatype, Option(literal.getLanguage))
+    (literal.getLabel, literal.getDatatype, Option(literal.getLanguage.orElse(null)))
 
   /**
     *  language tags are cases insensitive according to

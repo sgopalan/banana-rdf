@@ -30,17 +30,17 @@ object PlantainTurtleReader extends RDFReader[Plantain, Try, Turtle] {
     def handleStatement(statement: org.openrdf.model.Statement): Unit = {
       val s: Plantain#Node = statement.getSubject match {
         case bnode: sesame.BNode => BNode(bnode.getID)
-        case uri: sesame.URI     => URI(uri.toString)
+        case uri: sesame.IRI     => URI(uri.toString)
       }
       val p: Plantain#URI = statement.getPredicate match {
-        case uri: sesame.URI => URI(uri.toString)
+        case uri: sesame.IRI => URI(uri.toString)
       }
       val o: Plantain#Node = statement.getObject match {
         case bnode: sesame.BNode     => BNode(bnode.getID)
-        case uri: sesame.URI         => URI(uri.toString)
+        case uri: sesame.IRI         => URI(uri.toString)
         case literal: sesame.Literal => literal.getLanguage match {
           case null => makeLiteral(literal.stringValue, Uri(literal.getDatatype.toString))
-          case lang => makeLangTaggedLiteral(literal.stringValue, lang)
+          case lang => makeLangTaggedLiteral(literal.stringValue, lang.orElse(null))
         }
       }
       graph += (s, p, o)

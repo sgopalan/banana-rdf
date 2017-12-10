@@ -71,7 +71,7 @@ object Dependencies {
    * @see http://www.openrdf.org/
    * @see http://repo1.maven.org/maven2/org/openrdf/sesame/
    */
-  val sesameVersion = "2.9.0"
+  val sesameVersion = "4.0.0"
 
   val sesameQueryAlgebra = "org.openrdf.sesame" % "sesame-queryalgebra-evaluation" % sesameVersion
   val sesameQueryParser = "org.openrdf.sesame" % "sesame-queryparser-sparql" % sesameVersion
@@ -81,13 +81,14 @@ object Dependencies {
   val sesameSailMemory = "org.openrdf.sesame" % "sesame-sail-memory" % sesameVersion
   val sesameSailNativeRdf = "org.openrdf.sesame" % "sesame-sail-nativerdf" % sesameVersion
   val sesameRepositorySail = "org.openrdf.sesame" % "sesame-repository-sail" % sesameVersion
+  val sesameRioJsonld = "org.openrdf.sesame" % "sesame-rio-jsonld" % sesameVersion
 
   /**
    * jsonld-java
    * @see https://github.com/jsonld-java/jsonld-java
    * @see http://repo.typesafe.com/typesafe/snapshots/com/github/jsonld-java/jsonld-java-sesame
    */
-  val jsonldJava = "com.github.jsonld-java" % "jsonld-java-sesame" % "0.5.1"
+  //val jsonldJava = "com.github.jsonld-java" % "jsonld-java-sesame" % "0.5.1"
 
   /**
    * parboiled

@@ -3,6 +3,10 @@ package org.w3.banana.sesame.io
 import org.w3.banana.io._
 import org.w3.banana.sesame._
 import java.io._
+
+import org.openrdf.rio.helpers.JSONLDMode
+import org.w3.banana.sesame.io.SesameSyntax.jsonLdFramingSyntax
+
 import scala.util._
 
 class SesameRDFWriter[T](implicit
@@ -39,4 +43,12 @@ class SesameRDFWriterHelper(implicit ops: SesameOps) {
 
   implicit val jsonldFlattenedWriter: RDFWriter[Sesame, Try, JsonLdFlattened] = new SesameRDFWriter[JsonLdFlattened]
 
+
+  def framingWriter(
+      frame : java.util.Map[String, Object],
+      mode: JSONLDMode,
+      prettyPrint: Boolean = false) : SesameRDFWriter[JsonLdFramed] = {
+    implicit val syntax = jsonLdFramingSyntax(frame, mode, prettyPrint)
+    new SesameRDFWriter[JsonLdFramed]
+  }
 }
