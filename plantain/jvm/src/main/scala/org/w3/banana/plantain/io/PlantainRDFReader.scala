@@ -1,6 +1,8 @@
 package org.w3.banana.plantain
 package io
 
+import scala.compat.java8.OptionConverters._
+
 import java.io.{ Reader, InputStream }
 import akka.http.scaladsl.model.Uri
 import org.openrdf.rio._
@@ -38,9 +40,9 @@ object PlantainTurtleReader extends RDFReader[Plantain, Try, Turtle] {
       val o: Plantain#Node = statement.getObject match {
         case bnode: sesame.BNode     => BNode(bnode.getID)
         case uri: sesame.IRI         => URI(uri.toString)
-        case literal: sesame.Literal => literal.getLanguage match {
-          case null => makeLiteral(literal.stringValue, Uri(literal.getDatatype.toString))
-          case lang => makeLangTaggedLiteral(literal.stringValue, lang.orElse(null))
+        case literal: sesame.Literal => literal.getLanguage.asScala match {
+          case None => makeLiteral(literal.stringValue, Uri(literal.getDatatype.toString))
+          case Some(lang) => makeLangTaggedLiteral(literal.stringValue, lang)
         }
       }
       graph += (s, p, o)
