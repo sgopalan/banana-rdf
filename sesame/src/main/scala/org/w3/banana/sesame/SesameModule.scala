@@ -1,6 +1,11 @@
 package org.w3.banana.sesame
 
+import java.io.OutputStream
+
+import org.openrdf.model.Statement
 import org.openrdf.repository.RepositoryConnection
+import org.openrdf.rio.helpers.JSONLDSettings
+import org.openrdf.rio.jsonld.FramingJSONLDWriter
 import org.w3.banana._
 import org.w3.banana.io.{SparqlQueryResultsReader, _}
 import org.w3.banana.sesame.io._
@@ -54,11 +59,11 @@ trait SesameModule
 
   implicit val ntriplesWriter: RDFWriter[Sesame, Try, NTriples] = new NTriplesWriter
 
-  implicit val jsonldCompactedWriter: RDFWriter[Sesame, Try, JsonLdCompacted] = sesameRDFWriterHelper.jsonldCompactedWriter
+  implicit val jsonldCompactedWriter: SesameRDFWriter[JsonLdCompacted] = sesameRDFWriterHelper.jsonldCompactedWriter
 
-  implicit val jsonldExpandedWriter: RDFWriter[Sesame, Try, JsonLdExpanded] = sesameRDFWriterHelper.jsonldExpandedWriter
+  implicit val jsonldExpandedWriter: SesameRDFWriter[JsonLdExpanded] = sesameRDFWriterHelper.jsonldExpandedWriter
 
-  implicit val jsonldFlattenedWriter: RDFWriter[Sesame, Try, JsonLdFlattened] = sesameRDFWriterHelper.jsonldFlattenedWriter
+  implicit val jsonldFlattenedWriter: SesameRDFWriter[JsonLdFlattened] = sesameRDFWriterHelper.jsonldFlattenedWriter
 
   implicit val jsonSolutionsWriter: SparqlSolutionsWriter[Sesame, SparqlAnswerJson] =
     SesameSolutionsWriter.solutionsWriterJson
@@ -71,5 +76,4 @@ trait SesameModule
 
   implicit val xmlQueryResultsReader: SparqlQueryResultsReader[Sesame, SparqlAnswerXml] =
     SesameQueryResultsReader.queryResultsReaderXml
-
 }

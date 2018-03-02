@@ -13,11 +13,11 @@ import org.openrdf.model.{Namespace, Statement}
 import org.openrdf.rio.helpers._
 import org.openrdf.rio.{RDFFormat, RDFHandlerException, RDFWriter}
 
-object FramingSesameJSONLDWriter  {
-  val JSONLD_FRAMING = new RioSettingImpl[Object]("jsonld-framing", "jsonld-framing", null)
+object FramingJSONLDWriter  {
+  val JSONLD_FRAMING = new RioSettingImpl[Any]("jsonld-framing", "jsonld-framing", null)
 }
 
-class FramingSesameJSONLDWriter(final val writer : Writer) extends AbstractRDFWriter with RDFWriter {
+class FramingJSONLDWriter(final val writer : Writer) extends AbstractRDFWriter with RDFWriter {
 
   private val model = new LinkedHashModel
 
@@ -64,21 +64,28 @@ class FramingSesameJSONLDWriter(final val writer : Writer) extends AbstractRDFWr
       //
       ////////////////////////////////////////////////////////////////////////////
       val inframe = getWriterConfig()
-        .get(FramingSesameJSONLDWriter.JSONLD_FRAMING).asInstanceOf[util.Map[String, Object]]
+        .get(FramingJSONLDWriter.JSONLD_FRAMING).asInstanceOf[util.Map[String, Object]]
+
+      if (mode eq JSONLDMode.FLATTEN) output = JsonLdProcessor.flatten(output, inframe, opts)
+      if (mode eq JSONLDMode.COMPACT) {
+        val localCtx = new util.HashMap[String, AnyRef]
+        if (inframe == null) {
+          val ctx = new util.LinkedHashMap[String, Object]();
+          addPrefixes(ctx, model.getNamespaces());
+          localCtx.put("@context", ctx);
+        }
+        else {
+          localCtx.putAll(inframe)
+        }
+        output = JsonLdProcessor.compact(output, localCtx, opts)
+      }
+
       ////////////////////////////////////////////////////////////////////////////
       //
       // This is the end of the patch
       //
       ////////////////////////////////////////////////////////////////////////////
 
-      if (mode eq JSONLDMode.FLATTEN) output = JsonLdProcessor.flatten(output, inframe, opts)
-      if (mode eq JSONLDMode.COMPACT) {
-        val ctx = new util.LinkedHashMap[String, AnyRef]
-        addPrefixes(ctx, model.getNamespaces)
-        val localCtx = new util.HashMap[String, AnyRef]
-        localCtx.put("@context", ctx)
-        output = JsonLdProcessor.compact(output, localCtx, opts)
-      }
       if (getWriterConfig.get(BasicWriterSettings.PRETTY_PRINT)) JsonUtils.writePrettyPrint(writer, output)
       else JsonUtils.write(writer, output)
     } catch {
