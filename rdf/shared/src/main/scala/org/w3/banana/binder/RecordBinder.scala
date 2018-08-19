@@ -76,6 +76,14 @@ class RecordBinder[Rdf <: RDF]()(implicit ops: RDFOps[Rdf]) {
       (pointed / predicate).asSet[T]
   }
 
+
+  /**
+    * No idea if this works... See FromPG.ListFromPG
+    */
+  def list[T](predicate: Rdf#URI)(implicit objectBinder: PGBinder[Rdf, T]): Property[Rdf, List[T]] =
+    property[List[T]](predicate)
+
+
   def newUri(prefix: String): Rdf#URI = {
     def s4(): String = Math.floor((1 + Math.random()) * 0x10000).toString().substring(1)
     URI(s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4())
