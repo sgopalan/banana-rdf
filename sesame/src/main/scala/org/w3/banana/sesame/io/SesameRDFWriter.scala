@@ -1,13 +1,11 @@
 package org.w3.banana.sesame.io
 
+import org.w3.banana.Prefix
 import org.w3.banana.io._
 import org.w3.banana.sesame._
-import java.io.{Writer, _}
+import java.io._
 
-import org.openrdf.model.Statement
 import org.openrdf.rio.RioSetting
-import org.openrdf.rio.helpers.{JSONLDMode, JSONLDSettings, RioSettingImpl}
-import org.openrdf.rio.jsonld.FramingJSONLDWriter
 
 import scala.util._
 
@@ -16,25 +14,49 @@ class SesameRDFWriter[T](implicit
   sesameSyntax: SesameSyntax[T]
 ) extends RDFWriter[Sesame, Try, T] {
 
-  def write(graph: Sesame#Graph, os: OutputStream, base: String, writerConfig: Map[RioSetting[Any], _]): Try[Unit] = Try {
-    val sWriter = sesameSyntax.rdfWriter(os, base, writerConfig)
+  def write(graph: Sesame#Graph, os: OutputStream, base: String, prefixes: Set[Prefix[Sesame]]): Try[Unit] = Try {
+    val sWriter = sesameSyntax.rdfWriter(os, base)
+    prefixes.foreach(p => {
+      sWriter.handleNamespace(p.prefixName, p.prefixIri)
+    })
     sWriter.startRDF()
     ops.getTriples(graph) foreach sWriter.handleStatement
     sWriter.endRDF()
   }
 
-  def asString(graph: Sesame#Graph, base: String, writerConfig: Map[RioSetting[Any], _]): Try[String] = Try {
+  def asString(graph: Sesame#Graph, base: String, prefixes: Set[Prefix[Sesame]]): Try[String] = Try {
     val result = new StringWriter()
-    val sWriter = sesameSyntax.rdfWriter(result, base, writerConfig)
+    val sWriter = sesameSyntax.rdfWriter(result, base)
+    prefixes.foreach(p => {
+      sWriter.handleNamespace(p.prefixName, p.prefixIri)
+    })
     sWriter.startRDF()
     ops.getTriples(graph) foreach sWriter.handleStatement
     sWriter.endRDF()
     result.toString
   }
 
-  def write(graph: Sesame#Graph, os: OutputStream, base: String): Try[Unit] = write(graph, os, base, Map.empty)
+  def write(graph: Sesame#Graph, os: OutputStream, base: String, prefixes: Set[Prefix[Sesame]], writerConfig: Map[RioSetting[Any], _]): Try[Unit] = Try {
+    val sWriter = sesameSyntax.rdfWriter(os, base, writerConfig)
+    prefixes.foreach(p => {
+      sWriter.handleNamespace(p.prefixName, p.prefixIri)
+    })
+    sWriter.startRDF()
+    ops.getTriples(graph) foreach sWriter.handleStatement
+    sWriter.endRDF()
+  }
 
-  def asString(graph: Sesame#Graph, base: String): Try[String] = asString(graph, base, Map.empty)
+  def asString(graph: Sesame#Graph, base: String, prefixes: Set[Prefix[Sesame]], writerConfig: Map[RioSetting[Any], _]): Try[String] = Try {
+    val result = new StringWriter()
+    val sWriter = sesameSyntax.rdfWriter(result, base, writerConfig)
+    prefixes.foreach(p => {
+      sWriter.handleNamespace(p.prefixName, p.prefixIri)
+    })
+    sWriter.startRDF()
+    ops.getTriples(graph) foreach sWriter.handleStatement
+    sWriter.endRDF()
+    result.toString
+  }
 }
 
 class SesameRDFWriterHelper(implicit ops: SesameOps) {
