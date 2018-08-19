@@ -16,14 +16,14 @@ class SesameRDFWriter[T](implicit
   sesameSyntax: SesameSyntax[T]
 ) extends RDFWriter[Sesame, Try, T] {
 
-  def write(graph: Sesame#Graph, os: OutputStream, base: String, writerConfig: Map[RioSetting[Any], Any]): Try[Unit] = Try {
+  def write(graph: Sesame#Graph, os: OutputStream, base: String, writerConfig: Map[RioSetting[Any], _]): Try[Unit] = Try {
     val sWriter = sesameSyntax.rdfWriter(os, base, writerConfig)
     sWriter.startRDF()
     ops.getTriples(graph) foreach sWriter.handleStatement
     sWriter.endRDF()
   }
 
-  def asString(graph: Sesame#Graph, base: String, writerConfig: Map[RioSetting[Any], Any]): Try[String] = Try {
+  def asString(graph: Sesame#Graph, base: String, writerConfig: Map[RioSetting[Any], _]): Try[String] = Try {
     val result = new StringWriter()
     val sWriter = sesameSyntax.rdfWriter(result, base, writerConfig)
     sWriter.startRDF()
